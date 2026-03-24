@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Bienvenue</h1>
-<p>test</p>
+<h1>Liste des utilisateurs</h1>
+
+<ul>
+    {% for u in utilisateurs %}
+        <li>{{ u.nom }}</li>
+    {% endfor %}
+</ul>
+
 {% endblock %}

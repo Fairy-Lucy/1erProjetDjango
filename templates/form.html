@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Page formulaire</h1>
+<h1>Ajouter un utilisateur</h1>
 
-<form>
-    <input type="text" placeholder="Tape quelque chose">
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="nom" placeholder="Nom">
     <button type="submit">Envoyer</button>
 </form>
 

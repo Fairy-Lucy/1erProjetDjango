@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyse de plan</title>
+</head>
+<body>
+
+<h1>Uploader un plan mécanique</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="image" required>
+    <button type="submit">Analyser</button>
+</form>
+
+<h2>Résultat :</h2>
+<p>{{ result }}</p>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Question à Gemini</title>
+</head>
+<body>
+
+    <h1>Poser une question à Gemini</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <textarea name="question" rows="6" cols="60" placeholder="Pose ta question ici..." required>{{ question }}</textarea>
+        <br><br>
+        <button type="submit">Envoyer</button>
+    </form>
+
+    {% if response_text %}
+        <h2>Réponse de Gemini :</h2>
+        <p>{{ response_text }}</p>
+    {% endif %}
+
+</body>
+</html>

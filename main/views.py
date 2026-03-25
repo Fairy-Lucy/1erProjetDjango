@@ -1,54 +1,35 @@
-from django.shortcuts import render, redirect
-from .models import Utilisateur
-import google.generativeai as genai
-from PIL import Image
+from django.shortcuts import render
+from google import genai
 import os
-from django.conf import settings
-
-# Configuration Gemini
-genai.configure(api_key="TA_CLE_API")
 
 
-def home(request):
-    utilisateurs = Utilisateur.objects.all()
-    return render(request, 'index.html', {'utilisateurs': utilisateurs})
+client = genai.Client(api_key="")
 
+def ask_gemini(request):
+    response_text = ""
+    question = ""
 
-def form_view(request):
-    if request.method == 'POST':
-        nom = request.POST.get('nom')
+    if request.method == "POST":
+        question = request.POST.get("question", "").strip()
 
-        if nom:
-            Utilisateur.objects.create(nom=nom)
+        if question:
+            prompt = f"""
+Tu es un assistant spécialisé en mécanique industrielle.
+Réponds de manière claire, pédagogique et précise, comme à un technicien expérimenté.
 
-        return redirect('home')
+Question de l'utilisateur :
+{question}
+"""
 
-    return render(request, 'form.html')
+            # ✅ APPEL CORRIGÉ ici
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",      # le plus rapide et performant de ta liste
+                contents=prompt
+            )
 
+            response_text = response.text
 
-def upload_image(request):
-    result = ""
-
-    if request.method == "POST" and request.FILES.get("image"):
-        file = request.FILES["image"]
-
-        media_path = os.path.join(settings.MEDIA_ROOT, file.name)
-
-        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
-
-        with open(media_path, "wb+") as destination:
-            for chunk in file.chunks():
-                destination.write(chunk)
-
-        image = Image.open(media_path)
-
-        model = genai.GenerativeModel('gemini-1.5-flash')
-
-        response = model.generate_content([
-            "Je souhaite évaluer le plan suivant, représentant un outillage pour fonderie. Ce qui m'intéresse, c'est les dimensions totales de l'outillage. Saurais tu procéder à un OCR, et de reconstituer les côtes principales sur ce plan, et d'estimer le poids ?",
-            image
-        ])
-
-        result = response.text
-
-    return render(request, "upload.html", {"result": result})
+    return render(request, "ask_gemini.html", {
+        "question": question,
+        "response_text": response_text,
+    })

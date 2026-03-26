@@ -4,7 +4,7 @@ from PIL import Image
 import io
 import base64
 
-client = genai.Client(api_key="AIzaSyDmXkGb793pXPH4nfv56RbReY65_rNicNQ")
+client = genai.Client(api_key="macle")
 
 SYSTEM_PROMPT = """Tu es un assistant technique spécialisé en lecture de plans industriels, outillages de fonderie, moules, usinage et conception mécanique.
 

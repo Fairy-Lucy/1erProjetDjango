@@ -1,22 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Question à Gemini</title>
+    <title>Reconnaissance de plans - Gemini</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        img { max-width: 100%; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; }
+        textarea, input[type="file"] { width: 100%; max-width: 700px; }
+    </style>
 </head>
 <body>
 
-    <h1>Poser une question à Gemini</h1>
+    <h1>Analyse de plan</h1>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <textarea name="question" rows="6" cols="60" placeholder="Pose ta question ici..." required>{{ question }}</textarea>
-        <br><br>
-        <button type="submit">Envoyer</button>
+
+        <p><strong>Question (optionnelle) :</strong></p>
+        <textarea name="question" rows="4" cols="80" placeholder="Posez une question en plus de l'analyse de base">{{ question }}</textarea>
+
+        <p><strong>Upload du plan (image) :</strong></p>
+        <input type="file" name="plan_image" accept="image/*" style="margin-bottom: 20px;">
+
+        <br>
+        <button type="submit">Analyser avec Gemini</button>
     </form>
+
+    {% if uploaded_image %}
+        <h2>Plan uploadé :</h2>
+        <img src="{{ uploaded_image }}" alt="Plan uploadé">
+    {% endif %}
 
     {% if response_text %}
         <h2>Réponse de Gemini :</h2>
-        <p>{{ response_text }}</p>
+        <p style="white-space: pre-wrap; line-height: 1.6;">{{ response_text }}</p>
     {% endif %}
 
 </body>

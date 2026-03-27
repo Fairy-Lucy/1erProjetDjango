@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reconnaissance de plans - Gemini</title>
+    <title>Reconnaissance de plans - Gemini (Image + PDF)</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
         img { max-width: 100%; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; }
-        textarea, input[type="file"] { width: 100%; max-width: 700px; }
+        .file-info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-    <h1>Analyse de plan</h1>
+    <h1>Reconnaissance de plans techniques (Gemini Vision + PDF)</h1>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -18,21 +18,29 @@
         <p><strong>Question (optionnelle) :</strong></p>
         <textarea name="question" rows="4" cols="80" placeholder="Posez une question en plus de l'analyse de base">{{ question }}</textarea>
 
-        <p><strong>Upload du plan (image) :</strong></p>
-        <input type="file" name="plan_image" accept="image/*" style="margin-bottom: 20px;">
+        <p><strong>Upload du plan (image ou PDF) :</strong></p>
+        <input type="file" name="plan_file" accept="image/*,application/pdf,.pdf" style="margin-bottom: 20px;">
 
         <br>
         <button type="submit">Analyser avec Gemini</button>
     </form>
 
     {% if uploaded_image %}
-        <h2>Plan uploadé :</h2>
+        <h2>Document uploadé (image) :</h2>
         <img src="{{ uploaded_image }}" alt="Plan uploadé">
+    {% endif %}
+
+    {% if uploaded_file_name %}
+        <h2>Document uploadé :</h2>
+        <div class="file-info">
+            📄 <strong>{{ uploaded_file_name }}</strong><br>
+            <small>PDF chargé et analysé par Gemini</small>
+        </div>
     {% endif %}
 
     {% if response_text %}
         <h2>Réponse de Gemini :</h2>
-        <p style="white-space: pre-wrap; line-height: 1.6;">{{ response_text }}</p>
+        <p style="white-space: pre-wrap; background: #f8f9fa; padding: 20px; border-radius: 8px;">{{ response_text }}</p>
     {% endif %}
 
 </body>

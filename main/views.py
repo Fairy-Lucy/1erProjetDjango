@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from google import genai
+from google.genai import types   # ← NOUVEAU pour les PDF
 from PIL import Image
 import io
 import base64
 
-client = genai.Client(api_key="AIzaSyDmXkGb793pXPH4nfv56RbReY65_rNicNQ")
+client = genai.Client(api_key="macle")
 
 SYSTEM_PROMPT = """Tu es un assistant technique spécialisé en lecture de plans industriels, outillages de fonderie, moules, usinage et conception mécanique.
 
@@ -41,40 +42,52 @@ def ask_gemini(request):
     response_text = ""
     question = ""
     uploaded_image = None
+    uploaded_file_name = None
 
     if request.method == "POST":
         question = request.POST.get("question", "").strip()
-        image_file = request.FILES.get("plan_image")
+        file = request.FILES.get("plan_file")
 
-        if image_file or question:
-            if image_file:
-                image_bytes = image_file.read()
-                pil_image = Image.open(io.BytesIO(image_bytes))
+        if file or question:
+            if file:
+                file_bytes = file.read()
+                mime_type = file.content_type or "application/octet-stream"
+                file_name = file.name
 
-                mime_type = image_file.content_type or "image/jpeg"
-                uploaded_image = f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode('utf-8')}"
+                if mime_type.startswith("image/"):
+                    pil_image = Image.open(io.BytesIO(file_bytes))
+                    uploaded_image = f"data:{mime_type};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
+                    file_part = pil_image
+                elif mime_type == "application/pdf" or file_name.lower().endswith(".pdf"):
+                    uploaded_file_name = file_name
+                    file_part = types.Part.from_bytes(
+                        data=file_bytes,
+                        mime_type="application/pdf"
+                    )
+                else:
+                    response_text = "Format de fichier non supporté. Seules les images et les PDF sont acceptés."
+                    file_part = None
 
                 user_text = SYSTEM_PROMPT + "\n\n"
-
                 if question:
                     user_text += f"Question supplémentaire de l'utilisateur :\n{question}\n\n"
+                user_text += "Analyse ce document (image ou PDF) en suivant STRICTEMENT les instructions ci-dessus."
 
-                user_text += "Analyse ce plan en suivant STRICTEMENT les instructions ci-dessus."
-
-                contents = [user_text, pil_image]
+                contents = [user_text, file_part] if file_part else None
 
             else:
                 contents = f"{SYSTEM_PROMPT}\n\nQuestion de l'utilisateur :\n{question}"
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=contents
-            )
-
-            response_text = response.text
+            if contents:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=contents
+                )
+                response_text = response.text
 
     return render(request, "ask_gemini.html", {
         "question": question,
         "response_text": response_text,
         "uploaded_image": uploaded_image,
+        "uploaded_file_name": uploaded_file_name,
     })
